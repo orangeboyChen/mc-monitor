@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@minecraft-js/rcon": "^1.1.0",
     "@nextui-org/button": "2.0.26",
     "@nextui-org/card": "^2.0.24",
     "@nextui-org/code": "2.0.24",

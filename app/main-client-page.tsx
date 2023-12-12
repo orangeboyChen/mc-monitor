@@ -14,13 +14,13 @@ const useMainClientPage = ({initOnlineUserData}: { initOnlineUserData: Array<str
         setInterval(async () => {
             const data = await getOnlineUserData();
             setOnlineUserData(data);
-        }, 15 * 1000)
+        }, 10 * 1000)
     }, []);
     return (
         <Card className="max-w-[400px]">
             <CardHeader className="flex gap-3">
                 <div className="flex flex-col">
-                    <p className="text-md">当前在线</p>
+                    <p className="text-md">在线玩家</p>
                 </div>
             </CardHeader>
             <Divider/>
