@@ -7,6 +7,7 @@ import MainClientPage from "@/app/main-client-page";
 import getOnlineUserData from "@/app/action";
 
 
+export const revalidate = 10;
 export default async function Home() {
   const data = await getOnlineUserData();
   return (
