@@ -1,16 +1,11 @@
 'use server';
-import {Card, CardHeader, CardBody, CardFooter} from "@nextui-org/card";
-import {Link} from "@nextui-org/link";
-import {Divider} from "@nextui-org/divider";
-import {Image} from "@nextui-org/image";
 import MainClientPage from "@/app/main-client-page";
-import getOnlineUserData from "@/app/action";
+import getMinecraftInfo from "@/app/action";
 
 
-export const revalidate = 10;
 export default async function Home() {
-  const data = await getOnlineUserData();
+  const data = await getMinecraftInfo();
   return (
-     <MainClientPage initOnlineUserData={data}/>
+     <MainClientPage initMinecraftInfo={data}/>
   );
 }

@@ -1,21 +1,20 @@
 'use client'
 
 import React, {useEffect, useState} from 'react';
-import {Button} from '@nextui-org/button';
-import {Input} from "@nextui-org/input";
 import {Card, CardBody, CardHeader} from "@nextui-org/card";
 import {Divider} from "@nextui-org/divider";
 import {Image} from "@nextui-org/image";
 import {Link} from "@nextui-org/link";
-import getOnlineUserData, {OnlineUserDataResponse} from "@/app/action";
+import getMinecraftInfo, {MinecraftInfoResponse} from "@/app/action";
 
-const useMainClientPage = ({initOnlineUserData}: { initOnlineUserData: OnlineUserDataResponse }) => {
-    const [onlineUserData, setOnlineUserData] = useState(initOnlineUserData)
+export const revalidate = 10;
+const useMainClientPage = ({initMinecraftInfo}: { initMinecraftInfo: MinecraftInfoResponse }) => {
+    const [data, setData] = useState(initMinecraftInfo)
 
     useEffect(() => {
         setInterval(async () => {
-            const data = await getOnlineUserData();
-            setOnlineUserData(data);
+            const data = await getMinecraftInfo();
+            setData(data);
         }, 10 * 1000)
     }, []);
     return (
@@ -25,7 +24,7 @@ const useMainClientPage = ({initOnlineUserData}: { initOnlineUserData: OnlineUse
                     <div className="flex flex-col">
                         <p className="text-md">
                         {
-                            onlineUserData.state === 'unavailable' ? '服务器离线' : '在线玩家'
+                            data.state === 'unavailable' ? '服务器离线' : '在线玩家'
                         }
                         </p>
                     </div>
@@ -33,8 +32,8 @@ const useMainClientPage = ({initOnlineUserData}: { initOnlineUserData: OnlineUse
                 <Divider/>
                 <CardBody>
                     {
-                        onlineUserData.online.length === 0 ? <p>没有人在线</p> :
-                            onlineUserData.online.map((nickname, i) => {
+                        data.online.length === 0 ? <p>没有人在线</p> :
+                            data.online.map((nickname, i) => {
                                 return (
                                     <p key={i}>{nickname}</p>
                                 );
@@ -54,7 +53,7 @@ const useMainClientPage = ({initOnlineUserData}: { initOnlineUserData: OnlineUse
                     />
                     <div className="flex flex-col">
                         <p className="text-md">Minecraft</p>
-                        <p className="text-small text-default-500">1.20.1</p>
+                        <p className="text-small text-default-500">{ data.info.version }</p>
                     </div>
                 </CardHeader>
                 <Divider/>
@@ -67,12 +66,12 @@ const useMainClientPage = ({initOnlineUserData}: { initOnlineUserData: OnlineUse
                     }}>
                         <div className="flex flex-col">
                             <p className="text-md">Forge</p>
-                            <p className="text-small text-default-500">47.2.0</p>
+                            <p className="text-small text-default-500">{ data.info.forge.version }</p>
                         </div>
                         <Link isBlock
                               showAnchorIcon
                               target={"_blank"}
-                              href="https://files.minecraftforge.net/net/minecraftforge/forge/index_1.20.1.html">
+                              href={ data.info.forge.downloadUrl }>
                             下载Forge</Link>
                     </div>
                     <div style={ {
@@ -83,13 +82,22 @@ const useMainClientPage = ({initOnlineUserData}: { initOnlineUserData: OnlineUse
                     }}>
                         <div className="flex flex-col">
                             <p className="text-md">Mod整合包</p>
-                            <p className="text-small text-default-500">1.0.0 更新于2023-12-11</p>
+                            <p className="text-small text-default-500">{ data.info.mod.version } 更新于{ data.info.mod.updateTime }</p>
                         </div>
                         <Link isBlock
                               showAnchorIcon
                               target={"_blank"}
-                              href="/mods-1.0.0-20231211.zip">
-                            下载Mod整合包</Link>
+                              href={ data.info.mod.downloadUrl }>
+                            <div style={{
+                                textAlign: "right"
+                            }}>
+                                <p>下载Mod整合包</p>
+                                {
+                                    data.info.mod.downloadTip ? <p style={{ fontSize: "small" }}>{ data.info.mod.downloadTip }</p> : <></>
+                                }
+                            </div>
+
+                        </Link>
                     </div>
                 </CardBody>
             </Card>
