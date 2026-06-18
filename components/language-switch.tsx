@@ -4,7 +4,7 @@ import React from 'react'
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/dropdown'
 import { Button } from '@nextui-org/button'
 import { useI18n } from '@/app/state/hooks'
-import { Locale, LOCALE_LABEL, SUPPORTED_LOCALES } from '@/app/i18n/messages'
+import { LOCALE_LABEL, SUPPORTED_LOCALES } from '@/app/i18n/messages'
 
 export const LanguageSwitch = () => {
     const { locale, setLocale, t } = useI18n()
