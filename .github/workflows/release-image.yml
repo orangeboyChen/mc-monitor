@@ -6,7 +6,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   validate:
@@ -14,6 +13,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       is_prerelease: ${{ github.event.release.prerelease }}
+      image_name: ${{ steps.image.outputs.name }}
     steps:
       - name: Validate release tag (vX.Y.Z)
         id: version
@@ -25,6 +25,11 @@ jobs:
             exit 1
           fi
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Compute lowercase image name
+        id: image
+        run: |
+          echo "name=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
   build:
     needs: validate
@@ -66,7 +71,7 @@ jobs:
           provenance: false
           cache-from: type=gha,scope=${{ matrix.arch }}
           cache-to: type=gha,scope=${{ matrix.arch }},mode=max
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ needs.validate.outputs.image_name }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
         run: |
@@ -110,17 +115,19 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ needs.validate.outputs.image_name }}
           tags: |
             type=raw,value=${{ needs.validate.outputs.version }}
             type=raw,value=latest,enable=${{ needs.validate.outputs.is_prerelease == 'false' }}
 
       - name: Create and push manifest list
         working-directory: /tmp/digests
+        env:
+          IMAGE_REF: ${{ env.REGISTRY }}/${{ needs.validate.outputs.image_name }}
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf "${REGISTRY}/${IMAGE_NAME}@sha256:%s " *)
+            $(printf "${IMAGE_REF}@sha256:%s " *)
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ${REGISTRY}/${IMAGE_NAME}:${{ needs.validate.outputs.version }}
+          docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ needs.validate.outputs.image_name }}:${{ needs.validate.outputs.version }}
