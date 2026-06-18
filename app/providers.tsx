@@ -1,22 +1,26 @@
-"use client";
+'use client'
 
-import * as React from "react";
-import {NextUIProvider} from "@nextui-org/system";
+import * as React from 'react'
+import {NextUIProvider} from '@nextui-org/system'
 import {useRouter} from 'next/navigation'
-import {ThemeProvider as NextThemesProvider} from "next-themes";
-import {ThemeProviderProps} from "next-themes/dist/types";
+import {JotaiAppProvider} from '@/app/state/provider'
+import type {Locale} from '@/app/i18n/messages'
+import type {Theme} from '@/app/state/keys'
 
 export interface ProvidersProps {
-    children: React.ReactNode;
-    themeProps?: ThemeProviderProps;
+    children: React.ReactNode
+    initialLocale: Locale
+    initialTheme: Theme
 }
 
-export function Providers({children, themeProps}: ProvidersProps) {
-    const router = useRouter();
+export const Providers = ({children, initialLocale, initialTheme}: ProvidersProps) => {
+    const router = useRouter()
 
     return (
         <NextUIProvider navigate={router.push}>
-            <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+            <JotaiAppProvider locale={initialLocale} theme={initialTheme}>
+                {children}
+            </JotaiAppProvider>
         </NextUIProvider>
-    );
+    )
 }

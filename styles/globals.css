@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* iOS Safari: prevent auto-zoom on input focus by enforcing >= 16px font-size
+   on touch devices. Desktop keeps the smaller, denser sizing. */
+@media (hover: none) and (pointer: coarse) {
+    input,
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+}
+
+/* Disable text-size auto-adjustment on mobile rotation. */
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}

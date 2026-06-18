@@ -25,8 +25,7 @@ COPY --from=deps /app/node_modules ./node_modules
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN pnpm run build
 
@@ -35,8 +34,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -57,9 +55,24 @@ USER nextjs
 EXPOSE 3000
 
 ENV PORT=3000
-# set hostname to localhost
-ENV HOSTNAME="0.0.0.0"
+ENV HOSTNAME=0.0.0.0
 
-# server.tsx.js is created by next build from the standalone output
+# -----------------------------------------------------------------------------
+# Runtime configuration (override with `-e` / docker-compose / k8s env)
+# -----------------------------------------------------------------------------
+# REQUIRED — mount a JSON config that describes Minecraft / Forge / Mod info.
+#   docker run -v ./mc-info.json:/config/mc-info.json:ro ...
+ENV MC_INFO_FILE=/config/mc-info.json
+
+# REQUIRED — `heathcliff26/minecraft-exporter` /metrics endpoint.
+# ENV MC_EXPORTER_URL=http://minecraft-exporter:9150/metrics
+
+# REQUIRED — Mod /metrics endpoint exposed by mc-server-enhanced-mod.
+# ENV MOD_METRICS_URL=http://minecraft:25585/metrics
+
+# OPTIONAL — Prometheus base URL (enables historical trends).
+# ENV PROM_URL=http://prometheus:9090
+
+# server.js is created by `next build` from the `output: 'standalone'` mode
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 CMD ["node", "server.js"]

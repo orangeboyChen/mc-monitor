@@ -1,109 +1,96 @@
 'use client'
 
-import React, {useEffect, useState} from 'react';
-import {Card, CardBody, CardHeader} from "@nextui-org/card";
-import {Divider} from "@nextui-org/divider";
-import {Image} from "@nextui-org/image";
-import {Link} from "@nextui-org/link";
-import getMinecraftInfo, {MinecraftInfoResponse} from "@/app/action";
+import React, { startTransition, useEffect, useState } from 'react'
+import getMinecraftInfo, { MinecraftInfoResponse } from '@/app/action'
+import { fetchExporterMetrics, fetchModMetrics } from '@/app/actions/metrics'
+import { useI18n } from '@/app/state/hooks'
+import { ServerStatusCard } from '@/components/dashboard/server-status-card'
+import { InfoCard } from '@/components/dashboard/info-card'
+import { MetricsPanel } from '@/components/dashboard/metrics-panel'
+import { StoragePanel } from '@/components/dashboard/storage-panel'
+import { HistoryPanel } from '@/components/dashboard/history-panel'
 
-export const revalidate = 10;
-const useMainClientPage = ({initMinecraftInfo}: { initMinecraftInfo: MinecraftInfoResponse }) => {
+export interface DashboardFlags {
+    hasInfoFile: boolean
+    hasExporter: boolean
+    hasMod: boolean
+    hasProm: boolean
+}
+
+interface Props {
+    initMinecraftInfo: MinecraftInfoResponse | null
+    flags: DashboardFlags
+}
+
+export const revalidate = 10
+
+const MainClientPage = ({ initMinecraftInfo, flags }: Props) => {
+    const { t } = useI18n()
     const [data, setData] = useState(initMinecraftInfo)
 
+    const needsLiveData = flags.hasInfoFile || flags.hasExporter
+
     useEffect(() => {
-        setInterval(async () => {
-            const data = await getMinecraftInfo();
-            setData(data);
-        }, 10 * 1000)
-    }, []);
+        if (!needsLiveData) return
+        const timer = setInterval(async () => {
+            try {
+                const next = await getMinecraftInfo()
+                startTransition(() => {
+                    setData(next)
+                })
+            } catch {
+                // ignore — UI keeps showing the previous snapshot.
+            }
+        }, 10_000)
+        return () => clearInterval(timer)
+    }, [needsLiveData])
+
+    const showStatus = flags.hasExporter && data != null
+    const showInfo = flags.hasInfoFile && data != null
+    const row1Count = (showStatus ? 1 : 0) + (showInfo ? 1 : 0)
+    const row1Cols =
+        row1Count >= 2 ? 'md:grid-cols-2' : 'md:grid-cols-1'
+
+    const showExporterMetrics = flags.hasExporter
+    const showModMetrics = flags.hasMod
+    const row2Count = (showExporterMetrics ? 1 : 0) + (showModMetrics ? 1 : 0)
+    const row2Cols =
+        row2Count >= 2 ? 'xl:grid-cols-2' : 'xl:grid-cols-1'
+
+    const showStorage = flags.hasMod
+    const showHistory = flags.hasProm
+
     return (
-        <>
-            <Card className="max-w-[400px]">
-                <CardHeader className="flex gap-3">
-                    <div className="flex flex-col">
-                        <p className="text-md">
-                        {
-                            data.state === 'unavailable' ? '服务器离线' : '在线玩家'
-                        }
-                        </p>
-                    </div>
-                </CardHeader>
-                <Divider/>
-                <CardBody>
-                    {
-                        data.online.length === 0 ? <p>没有人在线</p> :
-                            data.online.map((nickname, i) => {
-                                return (
-                                    <p key={i}>{nickname}</p>
-                                );
-                            })
-                    }
-                </CardBody>
-            </Card>
-            <div style={{ height: 12 }}></div>
-            <Card className="max-w-[400px]">
-                <CardHeader className="flex gap-3">
-                    <Image
-                        alt="nextui logo"
-                        height={40}
-                        radius="sm"
-                        src="https://static.wikia.nocookie.net/minecraft_zh_gamepedia/images/9/93/Grass_Block_JE7_BE6.png"
-                        width={40}
-                    />
-                    <div className="flex flex-col">
-                        <p className="text-md">Minecraft</p>
-                        <p className="text-small text-default-500">{ data.info.version }</p>
-                    </div>
-                </CardHeader>
-                <Divider/>
-                <CardBody>
-                    <div style={ {
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: 4
-                    }}>
-                        <div className="flex flex-col">
-                            <p className="text-md">Forge</p>
-                            <p className="text-small text-default-500">{ data.info.forge.version }</p>
-                        </div>
-                        <Link isBlock
-                              showAnchorIcon
-                              target={"_blank"}
-                              href={ data.info.forge.downloadUrl }>
-                            下载Forge</Link>
-                    </div>
-                    <div style={ {
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: 4
-                    }}>
-                        <div className="flex flex-col">
-                            <p className="text-md">Mod整合包</p>
-                            <p className="text-small text-default-500">{ data.info.mod.version } 更新于{ data.info.mod.updateTime }</p>
-                        </div>
-                        <Link isBlock
-                              showAnchorIcon
-                              target={"_blank"}
-                              href={ data.info.mod.downloadUrl }>
-                            <div style={{
-                                textAlign: "right"
-                            }}>
-                                <p>下载Mod整合包</p>
-                                {
-                                    data.info.mod.downloadTip ? <p style={{ fontSize: "small" }}>{ data.info.mod.downloadTip }</p> : <></>
-                                }
-                            </div>
+        <div className='flex flex-col gap-4 pb-10'>
+            {row1Count > 0 && (
+                <div className={`grid grid-cols-1 ${row1Cols} gap-4`}>
+                    {showStatus && <ServerStatusCard data={data!} />}
+                    {showInfo && <InfoCard info={data!.info} />}
+                </div>
+            )}
 
-                        </Link>
-                    </div>
-                </CardBody>
-            </Card>
-        </>
+            {row2Count > 0 && (
+                <div className={`grid grid-cols-1 ${row2Cols} gap-4`}>
+                    {showExporterMetrics && (
+                        <MetricsPanel
+                            title={t.metrics.exporterTitle}
+                            action={fetchExporterMetrics}
+                        />
+                    )}
+                    {showModMetrics && (
+                        <MetricsPanel
+                            title={t.metrics.modTitle}
+                            action={fetchModMetrics}
+                        />
+                    )}
+                </div>
+            )}
 
+            {showStorage && <StoragePanel />}
+
+            {showHistory && <HistoryPanel />}
+        </div>
     )
 }
 
-export default useMainClientPage;
+export default MainClientPage
