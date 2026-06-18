@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:22-alpine AS base
 
 # Enable pnpm via corepack (bundled with Node.js). Pin a specific version
 # so the build is reproducible and avoids "latest" being incompatible with
