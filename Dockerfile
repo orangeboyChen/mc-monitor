@@ -11,17 +11,21 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies with pnpm
+# Install dependencies with pnpm, using a BuildKit cache mount for the
+# pnpm content-addressable store so subsequent builds reuse downloaded tarballs
+# even when the lockfile changes.
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    pnpm config set store-dir /root/.local/share/pnpm/store && \
+    pnpm install --frozen-lockfile
 
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
-COPY . .
-RUN rm -rf ./node_modules
+# Bring in node_modules first so source-only changes don't re-trigger install.
 COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
