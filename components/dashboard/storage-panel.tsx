@@ -1,10 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
-import { Card, CardBody, CardHeader } from '@nextui-org/card'
-import { Divider } from '@nextui-org/divider'
-import { Input } from '@nextui-org/input'
-import { Button } from '@nextui-org/button'
+import { Button, Card, Input, Separator } from '@heroui/react'
 import { useMetrics } from '@/app/lib/use-metrics'
 import { useI18n } from '@/app/state/hooks'
 import { BarList, BarDatum } from '@/components/charts/bar-list'
@@ -58,14 +55,13 @@ export const StoragePanel = () => {
             filtered.slice(0, TOP_N).map((r) => ({
                 label: r.itemName || r.itemId,
                 value: r.amount,
-                sub: r.network ? `network: ${r.network.slice(0, 8)}…` : undefined,
             })),
         [filtered]
     )
 
     return (
-        <Card className='h-full' shadow='sm'>
-            <CardHeader className='flex items-center justify-between gap-3 flex-wrap'>
+        <Card className='h-full'>
+            <Card.Header className='flex flex-row items-center justify-between gap-3 flex-wrap'>
                 <div className='flex flex-col'>
                     <p className='text-sm text-default-500'>{t.storage.title}</p>
                     <p className='text-[10px] text-default-400'>
@@ -77,22 +73,21 @@ export const StoragePanel = () => {
                 </div>
                 <Button
                     size='sm'
-                    variant='flat'
+                    variant='secondary'
                     onPress={reload}
                     isDisabled={loading}
                 >
                     {loading ? t.metrics.loading : t.common.refresh}
                 </Button>
-            </CardHeader>
-            <Divider />
-            <CardBody className='gap-4'>
+            </Card.Header>
+            <Separator />
+            <Card.Content className='flex flex-col gap-4'>
                 <Input
-                    size='sm'
+                    aria-label={t.storage.searchPlaceholder}
+                    fullWidth
                     placeholder={t.storage.searchPlaceholder}
                     value={search}
-                    onValueChange={setSearch}
-                    isClearable
-                    onClear={() => setSearch('')}
+                    onChange={(e) => setSearch(e.target.value)}
                 />
 
                 {error ? (
@@ -156,7 +151,7 @@ export const StoragePanel = () => {
                         </div>
                     </div>
                 )}
-            </CardBody>
+            </Card.Content>
         </Card>
     )
 }

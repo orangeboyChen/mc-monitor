@@ -1,6 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import '@heroui/styles';
+
+@source '../app';
+@source '../components';
+@source '../config';
+
+/*
+ * Compatibility layer: the codebase was written against NextUI v2 semantic
+ * color tokens (default-*, content1, primary, rounded-medium). HeroUI v3 uses a
+ * different palette (surface / muted / accent ...). We alias the old token names
+ * to the new HeroUI v3 CSS variables so existing utility classes keep working.
+ * The aliases reference the raw `--*` variables, which HeroUI swaps between
+ * light (`:root`) and dark (`.dark`) — so dark mode keeps working automatically.
+ */
+@theme {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-danger: var(--danger);
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+
+    --color-primary: var(--accent);
+    --color-content1: var(--surface);
+
+    --color-default-100: var(--surface-secondary);
+    --color-default-200: var(--surface-tertiary);
+    --color-default-300: var(--border);
+    --color-default-400: var(--muted);
+    --color-default-500: var(--muted);
+    --color-default-600: var(--muted);
+
+    --radius-medium: 0.5rem;
+}
 
 /* iOS Safari: prevent auto-zoom on input focus by enforcing >= 16px font-size
    on touch devices. Desktop keeps the smaller, denser sizing. */

@@ -19,11 +19,11 @@ interface Props {
 }
 
 const SERIES_COLORS = [
-    'hsl(var(--nextui-primary))',
-    'hsl(var(--nextui-success))',
-    'hsl(var(--nextui-warning))',
-    'hsl(var(--nextui-secondary))',
-    'hsl(var(--nextui-danger))',
+    'var(--accent)',
+    'var(--success)',
+    'var(--warning)',
+    'var(--muted)',
+    'var(--danger)',
 ]
 
 const defaultFormatValue = (v: number): string => {

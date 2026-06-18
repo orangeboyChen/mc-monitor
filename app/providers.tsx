@@ -1,26 +1,32 @@
 'use client'
 
 import * as React from 'react'
-import {NextUIProvider} from '@nextui-org/system'
-import {useRouter} from 'next/navigation'
 import {JotaiAppProvider} from '@/app/state/provider'
-import type {Locale} from '@/app/i18n/messages'
+import type {Locale, LocalePreference} from '@/app/i18n/messages'
 import type {Theme} from '@/app/state/keys'
 
 export interface ProvidersProps {
     children: React.ReactNode
     initialLocale: Locale
+    initialLocalePreference: LocalePreference
     initialTheme: Theme
 }
 
-export const Providers = ({children, initialLocale, initialTheme}: ProvidersProps) => {
-    const router = useRouter()
-
+// HeroUI v3 does not require a provider. We only keep the Jotai app provider
+// here to seed the locale/theme atoms resolved on the server.
+export const Providers = ({
+    children,
+    initialLocale,
+    initialLocalePreference,
+    initialTheme,
+}: ProvidersProps) => {
     return (
-        <NextUIProvider navigate={router.push}>
-            <JotaiAppProvider locale={initialLocale} theme={initialTheme}>
-                {children}
-            </JotaiAppProvider>
-        </NextUIProvider>
+        <JotaiAppProvider
+            locale={initialLocale}
+            localePreference={initialLocalePreference}
+            theme={initialTheme}
+        >
+            {children}
+        </JotaiAppProvider>
     )
 }

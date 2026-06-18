@@ -1,9 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Card, CardBody, CardHeader } from '@nextui-org/card'
-import { Divider } from '@nextui-org/divider'
-import { Chip } from '@nextui-org/chip'
+import { Card, Chip, Separator } from '@heroui/react'
 import { useI18n } from '@/app/state/hooks'
 import type { MinecraftInfoResponse } from '@/app/action'
 
@@ -17,8 +15,8 @@ export const ServerStatusCard = ({ data }: Props) => {
     const count = data.online.length
 
     return (
-        <Card className='h-full' shadow='sm'>
-            <CardHeader className='flex items-center justify-between gap-3'>
+        <Card className='h-full'>
+            <Card.Header className='flex flex-row items-center justify-between gap-3'>
                 <div className='flex flex-col'>
                     <p className='text-sm text-default-500'>{t.server.sectionTitle}</p>
                     <p className='text-lg font-semibold'>
@@ -28,13 +26,13 @@ export const ServerStatusCard = ({ data }: Props) => {
                 <Chip
                     size='sm'
                     color={offline ? 'danger' : count > 0 ? 'success' : 'warning'}
-                    variant='flat'
+                    variant='soft'
                 >
                     {offline ? '●' : t.server.playersOnline(count)}
                 </Chip>
-            </CardHeader>
-            <Divider />
-            <CardBody className='gap-2'>
+            </Card.Header>
+            <Separator />
+            <Card.Content className='flex flex-col gap-2'>
                 {offline ? (
                     <p className='text-sm text-default-500'>—</p>
                 ) : count === 0 ? (
@@ -45,7 +43,7 @@ export const ServerStatusCard = ({ data }: Props) => {
                             <Chip
                                 key={`${nick}-${i}`}
                                 size='sm'
-                                variant='flat'
+                                variant='soft'
                                 className='font-mono'
                             >
                                 {nick}
@@ -53,7 +51,7 @@ export const ServerStatusCard = ({ data }: Props) => {
                         ))}
                     </div>
                 )}
-            </CardBody>
+            </Card.Content>
         </Card>
     )
 }

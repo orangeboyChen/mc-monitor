@@ -8,8 +8,13 @@
 
 import { useAtom, useAtomValue } from 'jotai'
 import { useCallback } from 'react'
-import { localeAtom, messagesAtom, themeAtom } from '@/app/state/atoms'
-import type { Locale, Messages } from '@/app/i18n/messages'
+import { localeAtom, localePreferenceAtom, messagesAtom, themeAtom } from '@/app/state/atoms'
+import {
+    detectLocale,
+    type Locale,
+    type LocalePreference,
+    type Messages,
+} from '@/app/i18n/messages'
 import {
     COOKIE_MAX_AGE_SECONDS,
     LOCALE_COOKIE_KEY,
@@ -25,20 +30,37 @@ const writeCookie = (key: string, value: string): void => {
     }
 }
 
+const deleteCookie = (key: string): void => {
+    try {
+        document.cookie = `${key}=; path=/; max-age=0; SameSite=Lax`
+    } catch {
+        // ignore (e.g. SSR or disabled cookies)
+    }
+}
+
+// Best-effort detection of the language the browser would use when no explicit
+// choice is stored (mirrors the server's Accept-Language handling).
+const detectBrowserLocale = (): Locale => {
+    if (typeof navigator === 'undefined') return 'zh'
+    return detectLocale(navigator.language)
+}
+
 interface I18n {
     locale: Locale
+    preference: LocalePreference
     setLocale: (l: Locale) => void
+    setPreference: (p: LocalePreference) => void
     t: Messages
 }
 
 export const useI18n = (): I18n => {
     const [locale, setLocaleAtom] = useAtom(localeAtom)
+    const [preference, setPreferenceAtom] = useAtom(localePreferenceAtom)
     const t = useAtomValue(messagesAtom)
 
-    const setLocale = useCallback(
+    const applyLocale = useCallback(
         (l: Locale) => {
             setLocaleAtom(l)
-            writeCookie(LOCALE_COOKIE_KEY, l)
             if (typeof document !== 'undefined') {
                 document.documentElement.lang = l
             }
@@ -46,7 +68,24 @@ export const useI18n = (): I18n => {
         [setLocaleAtom],
     )
 
-    return { locale, setLocale, t }
+    const setPreference = useCallback(
+        (p: LocalePreference) => {
+            setPreferenceAtom(p)
+            if (p === 'auto') {
+                // Forget the explicit choice; fall back to the browser language.
+                deleteCookie(LOCALE_COOKIE_KEY)
+                applyLocale(detectBrowserLocale())
+            } else {
+                writeCookie(LOCALE_COOKIE_KEY, p)
+                applyLocale(p)
+            }
+        },
+        [setPreferenceAtom, applyLocale],
+    )
+
+    const setLocale = useCallback((l: Locale) => setPreference(l), [setPreference])
+
+    return { locale, preference, setLocale, setPreference, t }
 }
 
 interface ThemeApi {

@@ -1,9 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { Card, CardBody, CardHeader } from '@nextui-org/card'
-import { Divider } from '@nextui-org/divider'
-import { Button } from '@nextui-org/button'
+import { Button, Card, Separator } from '@heroui/react'
 import { useI18n } from '@/app/state/hooks'
 import { LineChart, LineSeries } from '@/components/charts/line-chart'
 import { fetchRangeQuery, RangeKey } from '@/app/actions/metrics'
@@ -96,8 +94,8 @@ export const HistoryPanel = () => {
     )
 
     return (
-        <Card className='h-full' shadow='sm'>
-            <CardHeader className='flex items-center justify-between gap-3 flex-wrap'>
+        <Card className='h-full'>
+            <Card.Header className='flex flex-row items-center justify-between gap-3 flex-wrap'>
                 <div className='flex flex-col'>
                     <p className='text-sm text-default-500'>{t.history.title}</p>
                     <p className='text-[10px] text-default-400'>{t.history.subtitle}</p>
@@ -107,8 +105,7 @@ export const HistoryPanel = () => {
                         <Button
                             key={r.key}
                             size='sm'
-                            variant={r.key === range ? 'solid' : 'flat'}
-                            color={r.key === range ? 'primary' : 'default'}
+                            variant={r.key === range ? 'primary' : 'ghost'}
                             onPress={() => setRange(r.key)}
                             isDisabled={loading}
                         >
@@ -116,9 +113,9 @@ export const HistoryPanel = () => {
                         </Button>
                     ))}
                 </div>
-            </CardHeader>
-            <Divider />
-            <CardBody>
+            </Card.Header>
+            <Separator />
+            <Card.Content>
                 {notConfigured ? (
                     <p className='text-default-500 text-sm py-8 text-center'>
                         {t.history.notConfigured}
@@ -134,7 +131,7 @@ export const HistoryPanel = () => {
                 ) : (
                     <LineChart series={series} emptyText={t.history.noSeries} />
                 )}
-            </CardBody>
+            </Card.Content>
         </Card>
     )
 }

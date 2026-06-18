@@ -1,11 +1,5 @@
 'use client'
 
-import {
-	Navbar as NextUINavbar,
-	NavbarBrand,
-	NavbarContent,
-	NavbarItem,
-} from '@nextui-org/navbar'
 import NextLink from 'next/link'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { LanguageSwitch } from '@/components/language-switch'
@@ -15,33 +9,19 @@ export const Navbar = () => {
 	const { t } = useI18n()
 
 	return (
-		<NextUINavbar
-			maxWidth='xl'
-			position='sticky'
-			isBordered
-			classNames={{ wrapper: 'px-3 sm:px-6 gap-2' }}
-		>
-			<NavbarContent justify='start' className='basis-auto flex-grow min-w-0'>
-				<NavbarBrand as='li' className='gap-2 min-w-0'>
-					<NextLink className='flex items-center gap-2 min-w-0 max-w-full' href='/'>
-						<span className='font-bold text-foreground truncate hidden sm:inline'>
-							{t.nav.title}
-						</span>
-					</NextLink>
-				</NavbarBrand>
-			</NavbarContent>
+		<header className='sticky top-0 z-40 w-full border-b border-default-300 bg-background/70 backdrop-blur-lg backdrop-saturate-150'>
+			<nav className='container mx-auto max-w-7xl flex h-14 items-center justify-between gap-2 px-3 sm:px-6'>
+				<NextLink className='flex items-center gap-2 min-w-0 max-w-full' href='/'>
+					<span className='font-bold text-foreground truncate'>
+						{t.nav.title}
+					</span>
+				</NextLink>
 
-			<NavbarContent
-				justify='end'
-				className='basis-auto flex-grow-0 gap-0 sm:gap-2 shrink-0'
-			>
-				<NavbarItem>
+				<div className='flex items-center gap-0 sm:gap-2 shrink-0'>
 					<LanguageSwitch />
-				</NavbarItem>
-				<NavbarItem>
 					<ThemeSwitch />
-				</NavbarItem>
-			</NavbarContent>
-		</NextUINavbar>
+				</div>
+			</nav>
+		</header>
 	)
 }

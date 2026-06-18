@@ -3,6 +3,10 @@
 
 export type Locale = 'zh' | 'en' | 'ja'
 
+// User-facing language preference. `auto` means "follow the browser /
+// Accept-Language" and is persisted by *removing* the locale cookie.
+export type LocalePreference = Locale | 'auto'
+
 export const SUPPORTED_LOCALES: readonly Locale[] = ['zh', 'en', 'ja'] as const
 
 export const LOCALE_LABEL: Record<Locale, string> = {
@@ -17,6 +21,7 @@ export type Messages = {
         themeLight: string
         themeDark: string
         language: string
+        languageAuto: string
     }
     server: {
         sectionTitle: string
@@ -44,6 +49,7 @@ export type Messages = {
         gauge: string
         counter: string
         unknown: string
+        topOf: (shown: number, total: number) => string
     }
     storage: {
         title: string
@@ -80,6 +86,7 @@ const zh: Messages = {
         themeLight: '浅色',
         themeDark: '深色',
         language: '语言',
+        languageAuto: '自动',
     },
     server: {
         sectionTitle: '服务器状态',
@@ -107,10 +114,11 @@ const zh: Messages = {
         gauge: '瞬时值',
         counter: '累计值',
         unknown: '未知',
+        topOf: (shown, total) => `前 ${shown} / 共 ${total}`,
     },
     storage: {
         title: '物流网络库存',
-        searchPlaceholder: '搜索物品…',
+        searchPlaceholder: '搜索物品名称或 ID…',
         topNTitle: (n) => `库存 Top ${n}`,
         item: '物品',
         amount: '数量',
@@ -143,6 +151,7 @@ const en: Messages = {
         themeLight: 'Light',
         themeDark: 'Dark',
         language: 'Language',
+        languageAuto: 'Auto',
     },
     server: {
         sectionTitle: 'Server status',
@@ -170,10 +179,11 @@ const en: Messages = {
         gauge: 'gauge',
         counter: 'counter',
         unknown: 'unknown',
+        topOf: (shown, total) => `top ${shown} of ${total}`,
     },
     storage: {
         title: 'Logistics network storage',
-        searchPlaceholder: 'Search items…',
+        searchPlaceholder: 'Search by item name or ID…',
         topNTitle: (n) => `Top ${n} stored items`,
         item: 'Item',
         amount: 'Amount',
@@ -206,6 +216,7 @@ const ja: Messages = {
         themeLight: 'ライト',
         themeDark: 'ダーク',
         language: '言語',
+        languageAuto: '自動',
     },
     server: {
         sectionTitle: 'サーバー状態',
@@ -233,10 +244,11 @@ const ja: Messages = {
         gauge: 'ゲージ',
         counter: 'カウンター',
         unknown: '不明',
+        topOf: (shown, total) => `上位 ${shown} / 全 ${total}`,
     },
     storage: {
         title: '物流ネットワーク在庫',
-        searchPlaceholder: 'アイテムを検索…',
+        searchPlaceholder: 'アイテム名または ID で検索…',
         topNTitle: (n) => `在庫トップ ${n}`,
         item: 'アイテム',
         amount: '数量',

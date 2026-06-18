@@ -8,19 +8,21 @@
 import { Provider, createStore } from 'jotai'
 import { useHydrateAtoms } from 'jotai/utils'
 import { useState, type ReactNode } from 'react'
-import { localeAtom, themeAtom } from '@/app/state/atoms'
-import type { Locale } from '@/app/i18n/messages'
+import { localeAtom, localePreferenceAtom, themeAtom } from '@/app/state/atoms'
+import type { Locale, LocalePreference } from '@/app/i18n/messages'
 import type { Theme } from '@/app/state/keys'
 
 interface HydrateProps {
     locale: Locale
+    localePreference: LocalePreference
     theme: Theme
     children: ReactNode
 }
 
-const HydrateAtoms = ({ locale, theme, children }: HydrateProps) => {
+const HydrateAtoms = ({ locale, localePreference, theme, children }: HydrateProps) => {
     useHydrateAtoms([
         [localeAtom, locale],
+        [localePreferenceAtom, localePreference],
         [themeAtom, theme],
     ])
     return <>{children}</>
@@ -28,17 +30,23 @@ const HydrateAtoms = ({ locale, theme, children }: HydrateProps) => {
 
 interface JotaiAppProviderProps {
     locale: Locale
+    localePreference: LocalePreference
     theme: Theme
     children: ReactNode
 }
 
-export const JotaiAppProvider = ({ locale, theme, children }: JotaiAppProviderProps) => {
+export const JotaiAppProvider = ({
+    locale,
+    localePreference,
+    theme,
+    children,
+}: JotaiAppProviderProps) => {
     // One store per browser tab. `useState` ensures the same store survives
     // re-renders without being recreated.
     const [store] = useState(() => createStore())
     return (
         <Provider store={store}>
-            <HydrateAtoms locale={locale} theme={theme}>
+            <HydrateAtoms locale={locale} localePreference={localePreference} theme={theme}>
                 {children}
             </HydrateAtoms>
         </Provider>

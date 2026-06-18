@@ -3,7 +3,7 @@ FROM node:20-alpine AS base
 # Enable pnpm via corepack (bundled with Node.js). Pin a specific version
 # so the build is reproducible and avoids "latest" being incompatible with
 # the bundled corepack.
-RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+RUN corepack enable && corepack prepare pnpm@11.1.3 --activate
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -14,7 +14,7 @@ WORKDIR /app
 # Install dependencies with pnpm, using a BuildKit cache mount for the
 # pnpm content-addressable store so subsequent builds reuse downloaded tarballs
 # even when the lockfile changes.
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm config set store-dir /root/.local/share/pnpm/store && \
     pnpm install --frozen-lockfile

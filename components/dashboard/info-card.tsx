@@ -1,9 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Card, CardBody, CardHeader } from '@nextui-org/card'
-import { Divider } from '@nextui-org/divider'
-import { Link } from '@nextui-org/link'
+import { Card, Link, Separator } from '@heroui/react'
 import { useI18n } from '@/app/state/hooks'
 import type { MinecraftInfo } from '@/app/action'
 
@@ -15,16 +13,16 @@ export const InfoCard = ({ info }: Props) => {
     const { t } = useI18n()
 
     return (
-        <Card className='h-full' shadow='sm'>
-            <CardHeader className='flex flex-col items-start gap-1'>
+        <Card className='h-full'>
+            <Card.Header className='flex flex-col items-start gap-1'>
                 <p className='text-sm text-default-500'>{t.info.sectionTitle}</p>
                 <div className='flex items-baseline gap-2'>
                     <p className='text-lg font-semibold'>Minecraft</p>
                     <p className='text-sm text-default-500 font-mono'>{info.version}</p>
                 </div>
-            </CardHeader>
-            <Divider />
-            <CardBody className='gap-3'>
+            </Card.Header>
+            <Separator />
+            <Card.Content className='flex flex-col gap-3'>
                 <div className='flex items-start justify-between gap-3 flex-wrap'>
                     <div className='flex flex-col min-w-0'>
                         <p className='text-sm font-medium'>{t.info.forge}</p>
@@ -33,14 +31,13 @@ export const InfoCard = ({ info }: Props) => {
                         </p>
                     </div>
                     <Link
-                        isBlock
-                        showAnchorIcon
-                        size='sm'
                         target='_blank'
+                        rel='noopener noreferrer'
                         href={info.forge.downloadUrl}
-                        className='max-w-full break-words'
+                        className='text-sm max-w-full break-words'
                     >
                         {t.info.forgeDownload}
+                        <Link.Icon />
                     </Link>
                 </div>
 
@@ -55,24 +52,23 @@ export const InfoCard = ({ info }: Props) => {
                         </p>
                     </div>
                     <Link
-                        isBlock
-                        showAnchorIcon
-                        size='sm'
                         target='_blank'
+                        rel='noopener noreferrer'
                         href={info.mod.downloadUrl}
-                        className='max-w-full break-words'
+                        className='text-sm max-w-full break-words'
                     >
-                        <div className='text-right'>
-                            <p>{t.info.modDownload}</p>
+                        <span className='text-right'>
+                            <span className='block'>{t.info.modDownload}</span>
                             {info.mod.downloadTip ? (
-                                <p className='text-[10px] text-default-400'>
+                                <span className='block text-[10px] text-default-400'>
                                     {info.mod.downloadTip}
-                                </p>
+                                </span>
                             ) : null}
-                        </div>
+                        </span>
+                        <Link.Icon />
                     </Link>
                 </div>
-            </CardBody>
+            </Card.Content>
         </Card>
     )
 }

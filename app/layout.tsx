@@ -3,8 +3,8 @@ import type { Metadata, Viewport } from 'next'
 import {Providers} from '@/app/providers'
 import {Navbar} from '@/components/navbar'
 import clsx from 'clsx'
-import {fontSans} from '@/config/fonts'
-import { resolveLocale, resolveTheme } from '@/app/state/server'
+import {fontMono, fontSans} from '@/config/fonts'
+import { resolveLocale, resolveLocalePreference, resolveTheme } from '@/app/state/server'
 import type { Theme } from '@/app/state/keys'
 
 export const metadata: Metadata = {
@@ -29,13 +29,14 @@ const BG_BY_THEME: Record<Theme, string> = {
   dark: '#000000',
 }
 
-const RootLayout = ({
+const RootLayout = async ({
   children,
 }: {
   children: React.ReactNode
 }) => {
-  const locale = resolveLocale()
-  const theme = resolveTheme()
+  const locale = await resolveLocale()
+  const localePreference = await resolveLocalePreference()
+  const theme = await resolveTheme()
   return (
       <html
           lang={locale}
@@ -46,10 +47,15 @@ const RootLayout = ({
       <body
           className={clsx(
               'min-h-screen bg-background font-sans antialiased',
-              fontSans.variable
+              fontSans.variable,
+              fontMono.variable
           )}
       >
-      <Providers initialLocale={locale} initialTheme={theme}>
+      <Providers
+          initialLocale={locale}
+          initialLocalePreference={localePreference}
+          initialTheme={theme}
+      >
           <div className='relative flex flex-col min-h-screen'>
               <Navbar/>
               <main className='container mx-auto max-w-7xl pt-6 px-3 sm:px-6 flex-grow'>

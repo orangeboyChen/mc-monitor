@@ -1,8 +1,9 @@
 name: reBuild and Publish Release Image
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*.*.*'
 
 env:
   REGISTRY: ghcr.io
@@ -12,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
-      is_prerelease: ${{ github.event.release.prerelease }}
       image_name: ${{ steps.image.outputs.name }}
     steps:
       - name: Validate release tag (vX.Y.Z)
@@ -118,7 +118,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ needs.validate.outputs.image_name }}
           tags: |
             type=raw,value=${{ needs.validate.outputs.version }}
-            type=raw,value=latest,enable=${{ needs.validate.outputs.is_prerelease == 'false' }}
+            type=raw,value=latest
 
       - name: Create and push manifest list
         working-directory: /tmp/digests
@@ -131,3 +131,27 @@ jobs:
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ needs.validate.outputs.image_name }}:${{ needs.validate.outputs.version }}
+
+  release:
+    # Only publish the GitHub Release once the image has been built and pushed,
+    # so a release never points at an image that failed to build.
+    needs: [validate, merge]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Full history so auto-generated notes can diff against the previous tag.
+          fetch-depth: 0
+
+      - name: Create release with auto-generated notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --verify-tag
